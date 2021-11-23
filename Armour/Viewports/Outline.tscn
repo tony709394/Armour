@@ -1,0 +1,54 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Utils/Armour/Viewports/Outline.gd" type="Script" id=1]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type canvas_item;
+
+uniform float width: hint_range(0.0, 10.0);
+uniform vec4 color: hint_color;
+
+void fragment() {
+    vec4 textureColor = texture(TEXTURE, SCREEN_UV, 0.0);
+    if (textureColor.a == 0.0){
+        bool isFinish = false;
+        vec2 screen = width * SCREEN_PIXEL_SIZE;
+        for (float x = -screen.x; x <= screen.x && !isFinish; x += SCREEN_PIXEL_SIZE.x) {
+            for (float y = -screen.y; y <= screen.y && !isFinish; y += SCREEN_PIXEL_SIZE.y) {
+                vec4 textureOutline = texture(TEXTURE, SCREEN_UV + vec2(x, y), 0.0);
+                if ( textureOutline.a != 0.0) {
+                    COLOR = color;
+                    isFinish = true;
+                }
+            }
+        }
+        if (!isFinish) {
+            COLOR = vec4(0, 0, 0, 0);
+        }
+    } else {
+        COLOR = vec4(0, 0, 0, 0);
+    }
+}"
+
+[sub_resource type="ShaderMaterial" id=2]
+shader = SubResource( 1 )
+shader_param/width = 3.0
+shader_param/color = null
+
+[node name="Outline" type="ViewportContainer"]
+material = SubResource( 2 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Viewport" type="Viewport" parent="."]
+transparent_bg = true
+handle_input_locally = false
+debug_draw = 1
+render_target_update_mode = 3
+
+[node name="Camera" type="Camera" parent="Viewport"]
+cull_mask = 0
